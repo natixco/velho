@@ -3,12 +3,15 @@ use std::fmt::Formatter;
 use std::net::UdpSocket;
 use std::thread;
 use std::time::{Duration, Instant};
-use serde_json::Value;
+use serde::{Serialize, Serializer};
+use serde::ser::{SerializeSeq, SerializeStruct};
+use serde_json::{json, Value};
 
 static LOCAL_ADDRESS: &str = "0.0.0.0";
 static BROADCAST_ADDRESS: &str = "255.255.255.255";
 static PORT: &str = "38899";
 
+#[derive(Clone)]
 pub struct Device {
   ip: String,
   mac: String,
@@ -17,6 +20,24 @@ pub struct Device {
   temp: u64,
   dimming: u64,
 }
+
+impl Serialize for Device {
+  fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+      S: Serializer,
+  {
+    // 3 is the number of fields in the struct.
+    let mut state = serializer.serialize_struct("Device", 6)?;
+    state.serialize_field("ip", &self.ip)?;
+    state.serialize_field("mac", &self.mac)?;
+    state.serialize_field("state", &self.state)?;
+    state.serialize_field("scene_id", &self.scene_id)?;
+    state.serialize_field("temp", &self.temp)?;
+    state.serialize_field("dimming", &self.dimming)?;
+    state.end()
+  }
+}
+
 
 impl std::fmt::Display for Device {
   fn fmt(&self, _f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -27,6 +48,12 @@ impl std::fmt::Display for Device {
 
 pub struct SocketHandler {
   socket: UdpSocket,
+}
+
+impl Default for SocketHandler {
+  fn default() -> Self {
+    Self { socket: UdpSocket::bind(format!("{}:{}", LOCAL_ADDRESS, PORT)).unwrap() }
+  }
 }
 
 impl SocketHandler {
@@ -50,9 +77,9 @@ impl SocketHandler {
   pub fn discover(&self) -> std::io::Result<Vec<Device>> {
     let now = Instant::now();
     let cloned = self.socket.try_clone().unwrap();
-    let mut devices: Vec<Device> = Vec::new();
 
-    let handle = thread::spawn(move || {
+    let thread_handle = thread::spawn(move || {
+      let mut devices: Vec<Device> = Vec::new();
       loop {
         let elapsed_time = now.elapsed().as_micros();
         if elapsed_time > 5000 {
@@ -81,10 +108,21 @@ impl SocketHandler {
         }
       }
     });
-    println!("Send data");
-    self.socket.send_to(&"{\"method\": \"getPilot\", \"params\": {}}".as_bytes().to_vec(), "255.255.255.255:38899").unwrap();
-    let r = handle.join().unwrap();
 
-    Ok(r)
+    let json = json!({
+      "method": "getPilot",
+      "params": {}
+    });
+    self.socket.send_to(json.to_string().as_bytes(), format!("{}:{}", BROADCAST_ADDRESS, PORT)).unwrap();
+    Ok(thread_handle.join().unwrap())
+  }
+
+  pub fn set_state(&self, device_ip: String, params: String) -> () {
+    let s: Value = serde_json::from_str(&params).unwrap();
+    let json = json!({
+      "method": "setState",
+      "params": s,
+    });
+    self.socket.send_to(json.to_string().as_bytes(), device_ip).unwrap();
   }
 }
