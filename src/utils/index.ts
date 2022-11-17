@@ -7,3 +7,14 @@ export async function setState(device: Device, params: Record<string, any>) {
     params: JSON.stringify(params),
   });
 }
+
+export async function setPilot(device: Device, params: Record<string, any>) {
+  console.log('setPilot', {
+    deviceIp: device.ip,
+    params: JSON.stringify(params),
+  })
+  return await invoke('set_pilot', {
+    deviceIp: device.ip,
+    params: JSON.stringify(params),
+  });
+}

@@ -6,3 +6,11 @@
   user-select: none;
   @apply transition-all outline-none
 }
+
+body {
+  background: transparent;
+}
+
+[data-radix-popper-content-wrapper] {
+  @apply transition-none
+}

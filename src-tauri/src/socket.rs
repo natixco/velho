@@ -1,50 +1,14 @@
-use std::error::Error;
-use std::fmt::Formatter;
 use std::net::UdpSocket;
 use std::thread;
-use std::time::{Duration, Instant};
-use serde::{Serialize, Serializer};
-use serde::ser::{SerializeSeq, SerializeStruct};
+use std::thread::JoinHandle;
+use std::time::{Instant};
 use serde_json::{json, Value};
+use tauri::{App, Manager, Wry};
+use crate::device::Device;
 
 static LOCAL_ADDRESS: &str = "0.0.0.0";
 static BROADCAST_ADDRESS: &str = "255.255.255.255";
 static PORT: &str = "38899";
-
-#[derive(Clone)]
-pub struct Device {
-  ip: String,
-  mac: String,
-  state: bool,
-  scene_id: u64,
-  temp: u64,
-  dimming: u64,
-}
-
-impl Serialize for Device {
-  fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-      S: Serializer,
-  {
-    // 3 is the number of fields in the struct.
-    let mut state = serializer.serialize_struct("Device", 6)?;
-    state.serialize_field("ip", &self.ip)?;
-    state.serialize_field("mac", &self.mac)?;
-    state.serialize_field("state", &self.state)?;
-    state.serialize_field("scene_id", &self.scene_id)?;
-    state.serialize_field("temp", &self.temp)?;
-    state.serialize_field("dimming", &self.dimming)?;
-    state.end()
-  }
-}
-
-
-impl std::fmt::Display for Device {
-  fn fmt(&self, _f: &mut Formatter<'_>) -> std::fmt::Result {
-    println!("Device: {} - Mac: {} - SceneId: {}", self.ip, self.mac, self.scene_id);
-    Ok(())
-  }
-}
 
 pub struct SocketHandler {
   socket: UdpSocket,
@@ -59,7 +23,7 @@ impl Default for SocketHandler {
 impl SocketHandler {
   pub fn new() -> std::io::Result<Self> {
     let attempt = UdpSocket::bind(format!("{}:{}", LOCAL_ADDRESS, PORT));
-    let mut socket;
+    let socket;
     match attempt {
       Ok(_socket) => {
         socket = _socket;
@@ -92,16 +56,18 @@ impl SocketHandler {
           Ok((number_of_bytes, src)) => {
             let data = String::from_utf8(buf[0..number_of_bytes].to_vec()).unwrap();
             println!("Data: {}", data);
-            let mut object: Value = serde_json::from_str(&data).unwrap();
+            let object: Value = serde_json::from_str(&data).unwrap();
             if let Some(result) = object.get("result") {
-              let _ = &devices.push(Device {
-                ip: src.to_string(),
-                mac: String::from(result.get("mac").unwrap().as_str().unwrap()),
-                scene_id: result.get("sceneId").unwrap().as_u64().unwrap(),
-                dimming: result.get("dimming").unwrap().as_u64().unwrap(),
-                state: result.get("state").unwrap().as_bool().unwrap(),
-                temp: result.get("temp").unwrap().as_u64().unwrap(),
-              });
+              if let None = result.get("success") {
+                let _ = &devices.push(Device {
+                  ip: src.to_string(),
+                  mac: String::from(result.get("mac").unwrap().as_str().unwrap()),
+                  scene_id: result.get("sceneId").unwrap().as_u64().unwrap(),
+                  dimming: result.get("dimming").unwrap().as_u64().unwrap(),
+                  state: result.get("state").unwrap().as_bool().unwrap(),
+                  temp: result.get("temp").unwrap().as_u64().unwrap(),
+                });
+              }
             }
           }
           Err(err) => panic!("Read error: {}", err)
@@ -121,6 +87,15 @@ impl SocketHandler {
     let s: Value = serde_json::from_str(&params).unwrap();
     let json = json!({
       "method": "setState",
+      "params": s,
+    });
+    self.socket.send_to(json.to_string().as_bytes(), device_ip).unwrap();
+  }
+
+  pub fn set_pilot(&self, device_ip: String, params: String) -> () {
+    let s: Value = serde_json::from_str(&params).unwrap();
+    let json = json!({
+      "method": "setPilot",
       "params": s,
     });
     self.socket.send_to(json.to_string().as_bytes(), device_ip).unwrap();
