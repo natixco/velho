@@ -1,9 +1,8 @@
 use std::net::UdpSocket;
+use std::sync::mpsc::Sender;
 use std::thread;
-use std::thread::JoinHandle;
-use std::time::{Instant};
+use std::time::{Duration};
 use serde_json::{json, Value};
-use tauri::{App, Manager, Wry};
 use crate::device::Device;
 
 static LOCAL_ADDRESS: &str = "0.0.0.0";
@@ -38,66 +37,61 @@ impl SocketHandler {
     })
   }
 
-  pub fn discover(&self) -> std::io::Result<Vec<Device>> {
-    let now = Instant::now();
-    let cloned = self.socket.try_clone().unwrap();
+  pub fn discover(&self, tx: Sender<Device>) -> () {
+    let thread_receiver_socket = self.socket.try_clone().unwrap();
+    thread::spawn(move || loop {
+      let mut buf: [u8; 1024] = [0; 1024];
+      let result = thread_receiver_socket.recv_from(&mut buf);
+      match result {
+        Ok((number_of_bytes, src)) => {
+          let data = String::from_utf8(buf[0..number_of_bytes].to_vec()).unwrap();
+          println!("Data: {}", data);
+          let object: Value = serde_json::from_str(&data).unwrap();
 
-    let thread_handle = thread::spawn(move || {
-      let mut devices: Vec<Device> = Vec::new();
-      loop {
-        let elapsed_time = now.elapsed().as_micros();
-        if elapsed_time > 5000 {
-          return devices;
-        }
-
-        let mut buf: [u8; 1024] = [0; 1024];
-        let result = cloned.recv_from(&mut buf);
-        match result {
-          Ok((number_of_bytes, src)) => {
-            let data = String::from_utf8(buf[0..number_of_bytes].to_vec()).unwrap();
-            println!("Data: {}", data);
-            let object: Value = serde_json::from_str(&data).unwrap();
-            if let Some(result) = object.get("result") {
-              if let None = result.get("success") {
-                let _ = &devices.push(Device {
-                  ip: src.to_string(),
-                  mac: String::from(result.get("mac").unwrap().as_str().unwrap()),
-                  scene_id: result.get("sceneId").unwrap().as_u64().unwrap(),
-                  dimming: result.get("dimming").unwrap().as_u64().unwrap(),
-                  state: result.get("state").unwrap().as_bool().unwrap(),
-                  temp: result.get("temp").unwrap().as_u64().unwrap(),
-                });
-              }
+          if let Some(result) = object.get("result") {
+            if let None = result.get("success") {
+              let device = Device {
+                ip: src.to_string(),
+                mac: String::from(result.get("mac").unwrap().as_str().unwrap()),
+                scene_id: result.get("sceneId").unwrap().as_u64().unwrap(),
+                dimming: result.get("dimming").unwrap().as_u64().unwrap(),
+                state: result.get("state").unwrap().as_bool().unwrap(),
+                temp: result.get("temp").unwrap().as_u64().unwrap(),
+              };
+              tx.send(device).unwrap();
             }
           }
-          Err(err) => panic!("Read error: {}", err)
         }
+        Err(err) => panic!("Read error: {}", err)
       }
     });
 
-    let json = json!({
-      "method": "getPilot",
-      "params": {}
+    let thread_sender_socket = self.socket.try_clone().unwrap();
+    thread::spawn(move || loop {
+      let json = json!({
+        "method": "getPilot",
+        "params": {}
+      });
+      thread_sender_socket.send_to(json.to_string().as_bytes(), format!("{}:{}", BROADCAST_ADDRESS, PORT)).unwrap();
+      thread::sleep(Duration::from_secs(5));
     });
-    self.socket.send_to(json.to_string().as_bytes(), format!("{}:{}", BROADCAST_ADDRESS, PORT)).unwrap();
-    Ok(thread_handle.join().unwrap())
   }
 
-  pub fn set_state(&self, device_ip: String, params: String) -> () {
-    let s: Value = serde_json::from_str(&params).unwrap();
-    let json = json!({
-      "method": "setState",
-      "params": s,
-    });
-    self.socket.send_to(json.to_string().as_bytes(), device_ip).unwrap();
-  }
-
-  pub fn set_pilot(&self, device_ip: String, params: String) -> () {
-    let s: Value = serde_json::from_str(&params).unwrap();
-    let json = json!({
-      "method": "setPilot",
-      "params": s,
-    });
-    self.socket.send_to(json.to_string().as_bytes(), device_ip).unwrap();
-  }
+  // pub fn set_state(&self, device_ip: String, params: String) -> () {
+  //   let s: Value = serde_json::from_str(&params).unwrap();
+  //   let json = json!({
+  //     "method": "setState",
+  //     "params": s,
+  //   });
+  //   self.socket.send_to(json.to_string().as_bytes(), device_ip).unwrap();
+  // }
+  //
+  // pub fn set_pilot(&self, device_ip: String, params: String) -> () {
+  //   let s: Value = serde_json::from_str(&params).unwrap();
+  //   let json = json!({
+  //     "method": "setPilot",
+  //     "params": s,
+  //   });
+  //   self.socket.send_to(json.to_string().as_bytes(), device_ip).unwrap();
+  // }
 }

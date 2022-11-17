@@ -12,7 +12,7 @@ export default function Toggle(props: Props) {
 
   useEffect(() => {
     setEnabled(props.enabled);
-  }, [props]);
+  }, [props.enabled]);
 
   return (
     <Switch checked={enabled} onChange={(value) => {

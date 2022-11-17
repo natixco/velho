@@ -1,7 +1,7 @@
 import { Device } from '../models';
 import Toggle from './Toggle';
 import { setPilot, setState } from '../utils';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import ContextMenuComponent from './ContextMenuComponent';
 
@@ -13,6 +13,11 @@ export default function DeviceComponent(props: Props) {
 
   const [device, setDevice] = useState(props.device);
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    setDevice(props.device);
+    console.log(props.device)
+  }, [props.device])
 
   async function toggle(device: Device): Promise<void> {
     const res = setState(device, {
