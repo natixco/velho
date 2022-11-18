@@ -1,8 +1,10 @@
 use std::net::UdpSocket;
 use std::sync::mpsc::Sender;
 use std::thread;
-use std::time::{Duration};
+use std::time::Duration;
+
 use serde_json::{json, Value};
+
 use crate::device::Device;
 
 static LOCAL_ADDRESS: &str = "0.0.0.0";
@@ -50,14 +52,7 @@ impl SocketHandler {
 
           if let Some(result) = object.get("result") {
             if let None = result.get("success") {
-              let device = Device {
-                ip: src.to_string(),
-                mac: String::from(result.get("mac").unwrap().as_str().unwrap()),
-                scene_id: result.get("sceneId").unwrap().as_u64().unwrap(),
-                dimming: result.get("dimming").unwrap().as_u64().unwrap(),
-                state: result.get("state").unwrap().as_bool().unwrap(),
-                temp: result.get("temp").unwrap().as_u64().unwrap(),
-              };
+              let device = Device::new(src.to_string(), result).unwrap();
               tx.send(device).unwrap();
             }
           }
@@ -77,21 +72,21 @@ impl SocketHandler {
     });
   }
 
-  // pub fn set_state(&self, device_ip: String, params: String) -> () {
-  //   let s: Value = serde_json::from_str(&params).unwrap();
-  //   let json = json!({
-  //     "method": "setState",
-  //     "params": s,
-  //   });
-  //   self.socket.send_to(json.to_string().as_bytes(), device_ip).unwrap();
-  // }
-  //
-  // pub fn set_pilot(&self, device_ip: String, params: String) -> () {
-  //   let s: Value = serde_json::from_str(&params).unwrap();
-  //   let json = json!({
-  //     "method": "setPilot",
-  //     "params": s,
-  //   });
-  //   self.socket.send_to(json.to_string().as_bytes(), device_ip).unwrap();
-  // }
+  pub fn set_state(&self, device_ip: String, state: bool) -> () {
+    let json = json!({
+      "method": "setState",
+      "params": {
+        "state": state
+      },
+    });
+    self.socket.send_to(json.to_string().as_bytes(), device_ip).unwrap();
+  }
+
+  pub fn set_pilot(&self, device_ip: String, params: &Value) -> () {
+    let json = json!({
+      "method": "setPilot",
+      "params": params,
+    });
+    self.socket.send_to(json.to_string().as_bytes(), device_ip).unwrap();
+  }
 }

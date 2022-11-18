@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Device } from './models';
 import DeviceComponent from './components/DeviceComponent';
-import { ArrowPathIcon } from '@heroicons/react/24/outline';
-import { emit } from '@tauri-apps/api/event';
 import { useEvent } from './hooks/useEvent';
 
 export default function App() {

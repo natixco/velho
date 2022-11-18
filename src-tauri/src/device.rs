@@ -1,8 +1,9 @@
 use std::fmt::Formatter;
-use serde::{Serialize, Serializer};
-use serde::ser::{SerializeStruct};
 
-#[derive(Clone)]
+use serde::{Serialize, Deserialize};
+use serde_json::Value;
+
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Device {
   pub ip: String,
   pub mac: String,
@@ -12,25 +13,22 @@ pub struct Device {
   pub dimming: u64,
 }
 
-impl Serialize for Device {
-  fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-      S: Serializer,
-  {
-    let mut state = serializer.serialize_struct("Device", 6)?;
-    state.serialize_field("ip", &self.ip)?;
-    state.serialize_field("mac", &self.mac)?;
-    state.serialize_field("state", &self.state)?;
-    state.serialize_field("scene_id", &self.scene_id)?;
-    state.serialize_field("temp", &self.temp)?;
-    state.serialize_field("dimming", &self.dimming)?;
-    state.end()
-  }
-}
-
 impl std::fmt::Display for Device {
   fn fmt(&self, _f: &mut Formatter<'_>) -> std::fmt::Result {
     println!("Device: {} - Mac: {} - SceneId: {}", self.ip, self.mac, self.scene_id);
     Ok(())
+  }
+}
+
+impl Device {
+  pub fn new(ip: String, params: &Value) -> std::io::Result<Self> {
+    Ok(Self {
+      ip,
+      mac: String::from(params.get("mac").unwrap().as_str().unwrap()),
+      scene_id: params.get("sceneId").unwrap().as_u64().unwrap(),
+      dimming: params.get("dimming").unwrap().as_u64().unwrap(),
+      state: params.get("state").unwrap().as_bool().unwrap(),
+      temp: params.get("temp").unwrap().as_u64().unwrap(),
+    })
   }
 }

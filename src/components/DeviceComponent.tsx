@@ -16,26 +16,7 @@ export default function DeviceComponent(props: Props) {
 
   useEffect(() => {
     setDevice(props.device);
-    console.log(props.device)
   }, [props.device])
-
-  async function toggle(device: Device): Promise<void> {
-    const res = setState(device, {
-      state: !device.state,
-    });
-    setDevice({...device, state: !device.state});
-  }
-
-  async function onRangeChange(v: any) {
-    console.log(v)
-    const res = setPilot(device, {
-      // dimming: v,
-      // sceneId: 0,
-      temp: v - 1000
-      // "r":0,"g":0,"b":255
-    });
-    console.log(res)
-  }
 
   return (
     <ContextMenuComponent items={[
@@ -46,10 +27,28 @@ export default function DeviceComponent(props: Props) {
       <div className="bg-zinc-300/10 hover:bg-zinc-400/20 rounded-md p-4" onContextMenu={() => console.log('ctx')}>
         <div className="flex flex-row justify-between items-center" onClick={() => setOpen(!open)}>
           <p className="text-sm text-white">{device.mac}</p>
-          <Toggle onChange={() => toggle(device)} enabled={device.state} />
+          <Toggle enabled={device.state} onChange={() => {
+            setState(device, !device.state);
+            setDevice({ ...device, state: !device.state });
+          }}/>
         </div>
         <div className={clsx(open ? '' : 'hidden')}>
-          <input type="range" min={2200} max={6500} step={100} onChange={(v) => onRangeChange(v.target.value)}/>
+          <div>
+            <label htmlFor="temp">Temp</label>
+            <input type="range" name="temp" min={2200} max={6500} step={100} value={device.temp} onChange={v => {
+              const params = { temp: v.target.valueAsNumber };
+              setPilot(device, params);
+              setDevice({ ...device, ...params })
+            }}/>
+          </div>
+          <div>
+            <label htmlFor="dimming">Dimming</label>
+            <input type="range" name="dimming" min={10} max={100} step={1} value={device.dimming} onChange={v => {
+              const params = { dimming: v.target.valueAsNumber };
+              setPilot(device, params);
+              setDevice({ ...device, ...params });
+            }}/>
+          </div>
         </div>
       </div>
     </ContextMenuComponent>

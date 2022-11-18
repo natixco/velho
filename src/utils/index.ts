@@ -1,20 +1,16 @@
-import { invoke } from '@tauri-apps/api/tauri';
 import { Device } from '../models';
+import { emit } from '@tauri-apps/api/event';
 
-export async function setState(device: Device, params: Record<string, any>) {
-  return await invoke('set_state', {
+export function setState(device: Device, state: boolean): void {
+  emit('set_state', {
     deviceIp: device.ip,
-    params: JSON.stringify(params),
+    state,
   });
 }
 
-export async function setPilot(device: Device, params: Record<string, any>) {
-  console.log('setPilot', {
+export function setPilot(device: Device, params: Partial<Device>): void {
+  emit('set_pilot', {
     deviceIp: device.ip,
-    params: JSON.stringify(params),
-  })
-  return await invoke('set_pilot', {
-    deviceIp: device.ip,
-    params: JSON.stringify(params),
+    params: params,
   });
 }
