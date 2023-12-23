@@ -5,7 +5,7 @@ import { useEvent } from '../hooks/useEvent';
 import { Link } from 'react-router-dom';
 import { useAtom } from 'jotai';
 import { setState } from '../utils';
-import { MouseEvent, useEffect } from 'react';
+import { useEffect } from 'react';
 import { invoke } from '@tauri-apps/api';
 import { setWindowSize } from '../utils/window';
 
@@ -34,12 +34,13 @@ export default function Lights() {
     setWindowSize();
   }, [devices]);
 
-  async function onContextMenu(device: Device, event: MouseEvent<HTMLAnchorElement>) {
-    event.preventDefault();
+  async function onContextMenu(device: Device) {
     const state = !device.state;
-    await setState(device, state);
-    device.state = state;
-    setDevices([...devices]);
+    const success = await setState(device, state);
+    if (success) {
+      device.state = state;
+      setDevices([...devices]);
+    }
   }
 
   return (
@@ -49,7 +50,7 @@ export default function Lights() {
         {devices.map((device, i) => (
           <Link key={device.mac}
                 to={`/${device.mac}`}
-                onContextMenu={(e) => onContextMenu(device, e)}
+                onContextMenu={() => onContextMenu(device)}
                 className={clsx(
                   'rounded-xl p-4 flex flex-col items-start justify-between gap-2 hover:scale-105',
                   device.state ? 'bg-indigo-500' : 'bg-zinc-900'

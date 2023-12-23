@@ -12,9 +12,11 @@ export default function Light() {
 
   async function toggle() {
     const state = !device.state;
-    await setState(device, state);
-    device.state = state;
-    setDevices([...devices]);
+    const success = await setState(device, state);
+    if (success) {
+      device.state = state;
+      setDevices([...devices]);
+    }
   }
 
   return (

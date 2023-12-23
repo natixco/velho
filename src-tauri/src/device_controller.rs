@@ -2,17 +2,17 @@ use std::sync::{Arc, Mutex};
 
 use serde_json::{json, Value};
 
-use crate::event_handler::socket_handler::SocketHandler;
+use crate::socket_handler::SocketHandler;
 
 pub struct DeviceController {
     socket_handler: Arc<Mutex<SocketHandler>>,
 }
 
 impl DeviceController {
-    pub fn new(socket_handler: Arc<Mutex<SocketHandler>>) -> std::io::Result<Self> {
-        Ok(Self {
+    pub fn new(socket_handler: Arc<Mutex<SocketHandler>>) -> Self {
+        Self {
             socket_handler
-        })
+        }
     }
 
     pub fn set_state(&self, device_ip: String, state: bool) -> () {

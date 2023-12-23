@@ -3,15 +3,21 @@ all(not(debug_assertions), target_os = "windows"),
 windows_subsystem = "windows"
 )]
 
+use std::sync::{Arc, Mutex};
+
 use tauri::Manager;
 
-use crate::event_handler::event_handler::EventHandler;
+use crate::device_controller::DeviceController;
+use crate::device_controller_wrapper::DeviceControllerWrapper;
+use crate::socket_handler::SocketHandler;
 use crate::storage::{AppInfo, Storage};
 
 mod device;
-mod event_handler;
 mod storage;
 mod commands;
+mod device_controller;
+mod socket_handler;
+mod device_controller_wrapper;
 
 fn main() {
     tauri::Builder::default()
@@ -22,20 +28,23 @@ fn main() {
                 package_info: app.package_info().clone(),
                 env: app.env().clone(),
             })?;
-            let event_handler = EventHandler::new(app.handle().clone())?;
-
             storage.load();
-            app.manage(storage);
 
-            event_handler.set_event_listeners();
-
-            let mut socket_handler = event_handler.socket_handler.lock().unwrap();
+            let mut socket_handler = SocketHandler::new()?;
             socket_handler.start_listen(app.handle().clone());
-            socket_handler.start_auto_update();
+
+            app.manage(storage);
+            app.manage(DeviceControllerWrapper {
+                controller: Arc::new(Mutex::new(DeviceController::new(Arc::new(Mutex::new(socket_handler))))),
+            });
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![commands::get_devices])
+        .invoke_handler(tauri::generate_handler![
+            commands::get_devices,
+            commands::set_state,
+            commands::set_pilot,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
