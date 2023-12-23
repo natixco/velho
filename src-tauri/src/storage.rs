@@ -39,7 +39,7 @@ impl Storage {
             Some(index) => devices[index] = device,
             None => devices.push(device),
         }
-        self.app.handle.get_window("main").unwrap().emit("device_discovery", device_clone).unwrap();
+        self.app.handle.get_window("main").unwrap().emit("upsert_device", device_clone).unwrap();
         self.save(devices.to_vec());
     }
 

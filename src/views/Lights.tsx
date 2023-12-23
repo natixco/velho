@@ -1,46 +1,15 @@
 import { Device } from '../models';
 import clsx from 'clsx';
-import { devicesAtom } from '../store';
-import { useEvent } from '../hooks/useEvent';
 import { Link } from 'react-router-dom';
-import { useAtom } from 'jotai';
-import { setState } from '../utils';
-import { useEffect } from 'react';
-import { invoke } from '@tauri-apps/api';
-import { setWindowSize } from '../utils/window';
+import { useDevices } from '../hooks/useDevices';
 
 export default function Lights() {
 
-  const [devices, setDevices] = useAtom(devicesAtom);
-
-  useEvent<Device>('device_discovery', device => {
-    const existingDevice = devices.findIndex(d => d.ip === device.ip);
-    if (existingDevice > -1) {
-      // const clonedDevices = [...devices];
-      // clonedDevices[existingDevice] = device;
-      // setDevices(clonedDevices);
-    } else {
-      setDevices([...devices, device]);
-    }
-  }, []);
-
-  useEffect(() => {
-    invoke<Device[]>('get_devices').then(devices => {
-      setDevices(devices);
-    });
-  }, []);
-
-  useEffect(() => {
-    setWindowSize();
-  }, [devices]);
+  const { devices, setState } = useDevices();
 
   async function onContextMenu(device: Device) {
     const state = !device.state;
-    const success = await setState(device, state);
-    if (success) {
-      device.state = state;
-      setDevices([...devices]);
-    }
+    await setState(device, state);
   }
 
   return (

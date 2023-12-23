@@ -54,21 +54,12 @@ impl SocketHandler {
         });
     }
 
-    pub fn start_auto_update(&mut self) -> () {
-        if self.started_auto_update {
-            return;
-        }
-
-        self.started_auto_update = true;
-
+    pub fn broadcast_get_pilot(&self) -> () {
         let thread_sender_socket = self.socket.try_clone().unwrap();
-        thread::spawn(move || loop {
-            let data = json!({
+        let data = json!({
                 "method": "getPilot",
                 "params": {}
             });
-            thread_sender_socket.send_to(data.to_string().as_bytes(), format!("{}:{}", BROADCAST_ADDRESS, PORT)).unwrap();
-            thread::sleep(Duration::from_secs(5));
-        });
+        thread_sender_socket.send_to(data.to_string().as_bytes(), format!("{}:{}", BROADCAST_ADDRESS, PORT)).unwrap();
     }
 }

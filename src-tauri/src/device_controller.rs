@@ -15,6 +15,10 @@ impl DeviceController {
         }
     }
 
+    pub fn refresh_devices(&self) -> () {
+        self.socket_handler.lock().unwrap().broadcast_get_pilot();
+    }
+
     pub fn set_state(&self, device_ip: String, state: bool) -> () {
         self.send_event("setState", device_ip, json!({"state": state}));
     }
@@ -28,12 +32,11 @@ impl DeviceController {
             "method": method,
             "params": params,
         });
-        match self.socket_handler.lock().unwrap().socket.send_to(data.to_string().as_bytes(), device_ip) {
-            Ok(_) => {}
-            Err(error) => {
-                // TODO: send error to ui
-                println!("Error: {}", error);
+        match self.socket_handler.lock() {
+            Ok(handler) => {
+                handler.socket.send_to(data.to_string().as_bytes(), device_ip).unwrap();
             }
+            Err(error) => println!("Error: {}", error),
         }
     }
 }

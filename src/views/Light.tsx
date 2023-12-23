@@ -1,22 +1,22 @@
 import { Link, useParams } from 'react-router-dom';
-import { useAtom } from 'jotai';
-import { devicesAtom } from '../store';
 import clsx from 'clsx';
-import { setState } from '../utils';
+import { ChangeEvent } from 'react';
+import { useDevices } from '../hooks/useDevices';
 
 export default function Light() {
 
-  const [devices, setDevices] = useAtom(devicesAtom);
+  const { devices, setState, setPilot } = useDevices();
   const { mac } = useParams();
   const device = devices.find(x => x.mac === mac)!;
 
   async function toggle() {
     const state = !device.state;
-    const success = await setState(device, state);
-    if (success) {
-      device.state = state;
-      setDevices([...devices]);
-    }
+    await setState(device, state);
+  }
+
+  async function setDimming(e: ChangeEvent<HTMLInputElement>) {
+    const dimming = parseInt(e.target.value);
+    await setPilot(device, { dimming });
   }
 
   return (
@@ -54,7 +54,7 @@ export default function Light() {
 
       <div className="rounded-xl p-4 bg-zinc-300 flex flex-col gap-2">
         <p className="font-bold text-zinc-900">Brightness</p>
-        <input type="range" min={0} max={100} step={1}/>
+        <input type="range" min={10} max={100} step={1} value={device.dimming} onChange={e => setDimming(e)}/>
       </div>
 
     </div>

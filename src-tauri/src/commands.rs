@@ -3,7 +3,9 @@ use crate::DeviceControllerWrapper;
 use crate::storage::Storage;
 
 #[tauri::command]
-pub fn get_devices(storage: tauri::State<Storage>) -> Vec<Device> {
+pub fn get_devices(storage: tauri::State<Storage>,
+                   device_controller_wrapper: tauri::State<DeviceControllerWrapper>) -> Vec<Device> {
+    device_controller_wrapper.controller.lock().unwrap().refresh_devices();
     storage.get_devices()
 }
 
