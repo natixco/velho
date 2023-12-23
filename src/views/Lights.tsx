@@ -5,11 +5,11 @@ import { useDevices } from '../hooks/useDevices';
 
 export default function Lights() {
 
-  const { devices, setState } = useDevices();
+  const { devices, setPilot } = useDevices();
 
   async function onContextMenu(device: Device) {
     const state = !device.state;
-    await setState(device, state);
+    await setPilot(device, { state });
   }
 
   return (

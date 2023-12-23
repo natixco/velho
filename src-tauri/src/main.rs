@@ -42,7 +42,6 @@ fn main() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::get_devices,
-            commands::set_state,
             commands::set_pilot,
         ])
         .run(tauri::generate_context!())

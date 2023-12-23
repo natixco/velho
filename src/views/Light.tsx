@@ -5,13 +5,13 @@ import { useDevices } from '../hooks/useDevices';
 
 export default function Light() {
 
-  const { devices, setState, setPilot } = useDevices();
+  const { devices, setPilot } = useDevices();
   const { mac } = useParams();
   const device = devices.find(x => x.mac === mac)!;
 
   async function toggle() {
     const state = !device.state;
-    await setState(device, state);
+    await setPilot(device, { state });
   }
 
   async function setDimming(e: ChangeEvent<HTMLInputElement>) {

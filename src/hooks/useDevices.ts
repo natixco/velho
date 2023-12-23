@@ -26,19 +26,6 @@ export function useDevices() {
     setDevices(devices);
   }
 
-  async function setState(device: Device, state: boolean) {
-    const success = await invoke<boolean>('set_state', {
-      deviceIp: device.ip,
-      state,
-    });
-
-    if (success) {
-      updateDevice(device, { state });
-    }
-
-    return success;
-  }
-
   async function setPilot(device: Device, params: Partial<Device>) {
     const success = await invoke<boolean>('set_pilot', {
       deviceIp: device.ip,
@@ -56,7 +43,6 @@ export function useDevices() {
     devices,
     setDevices,
     refreshDevices,
-    setState,
     setPilot,
   };
 }
