@@ -12,7 +12,19 @@
   },
   "tauri": {
     "allowlist": {
-      "all": false
+      "all": false,
+      "window": {
+        "all": false,
+        "close": true,
+        "hide": true,
+        "show": true,
+        "maximize": true,
+        "minimize": true,
+        "unmaximize": true,
+        "unminimize": true,
+        "startDragging": true,
+        "setSize": true
+      }
     },
     "bundle": {
       "active": true,
@@ -29,7 +41,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
+      "identifier": "velho",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
@@ -56,7 +68,7 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 500,
+        "height": 250,
         "resizable": false,
         "title": "Tauri App",
         "width": 400,

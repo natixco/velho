@@ -1,34 +1,35 @@
-import { useEffect, useState } from 'react';
-import { Device } from './models';
-import DeviceComponent from './components/DeviceComponent';
-import { useEvent } from './hooks/useEvent';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
+import Lights from './views/Lights';
+import Light from './views/Light';
+import { useEffect } from 'react';
+import { setWindowSize } from './utils/window';
+
+function Test() {
+  const location = useLocation();
+
+  useEffect(() => {
+    setWindowSize();
+  }, [location.pathname]);
+
+  return <></>;
+}
 
 export default function App() {
 
-  const [devices, setDevices] = useState<Device[]>([]);
-  useEvent<Device>('device_discovery', device => {
-    const existingDevice = devices.findIndex(d => d.ip === device.ip);
-    if (existingDevice > -1) {
-      const clonedDevices = [...devices];
-      clonedDevices[existingDevice] = device;
-      setDevices(clonedDevices);
-    } else {
-      setDevices([...devices, device]);
-    }
-  });
-
   useEffect(() => {
-    window.addEventListener("contextmenu", e => e.preventDefault());
+    window.addEventListener('contextmenu', e => e.preventDefault());
   }, []);
 
   return (
-    <div className="App py-4 px-6">
-      <div className="">
-        <div className="flex flex-row justify-between items-center mb-4">
-          <h1 className="text-sm text-white font-medium">Devices</h1>
-        </div>
-        {devices.map((device, i) => <DeviceComponent key={i} device={device} />)}
-      </div>
+    <div data-tauri-drag-region
+         className="container h-full w-full py-4 px-4 bg-zinc-100 rounded-xl flex flex-col gap-4 relative">
+      <BrowserRouter>
+        <Test/>
+        <Routes>
+          <Route path="/" element={<Lights/>}/>
+          <Route path="/:mac" element={<Light/>}/>
+        </Routes>
+      </BrowserRouter>
     </div>
-  )
+  );
 }

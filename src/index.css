@@ -2,15 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/Satoshi-Variable.woff2') format('woff2');
+  font-weight: 300 900;
+  font-display: swap;
+  font-style: normal;
+}
+
 * {
-  user-select: none;
-  @apply transition-all outline-none
+  -webkit-user-drag: none;
+  @apply transition-all outline-none cursor-default select-none
 }
 
 body {
-  background: transparent;
-}
-
-[data-radix-popper-content-wrapper] {
-  @apply transition-none
+  @apply overflow-hidden
 }
