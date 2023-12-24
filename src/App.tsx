@@ -1,30 +1,30 @@
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import Lights from './views/Lights';
-import Light from './views/Light';
 import { useEffect } from 'react';
 import { setWindowSize } from './utils/window';
-import { useDevices } from './hooks/useDevices';
+import { useLights } from './hooks/useLights';
 import { useEvent } from './hooks/useEvent';
-import { Device } from './models';
+import { Light } from './models';
+import LightView from './views/LightView';
 
 function Test() {
   const location = useLocation();
-  const { devices, refreshDevices, setDevices } = useDevices();
+  const { lights, refreshLights, setLights } = useLights();
 
   useEffect(() => {
     setWindowSize();
-    refreshDevices();
+    refreshLights();
   }, [location.pathname]);
 
-  useEvent<Device>('upsert_device', device => {
-    const index = devices.findIndex(x => x.mac === device.mac);
-    const devicesCopy = [...devices];
+  useEvent<Light>('upsert_light', light => {
+    const index = lights.findIndex(x => x.state.mac === light.state.mac);
+    const devicesCopy = [...lights];
     if (index === -1) {
-      devicesCopy.push(device);
+      devicesCopy.push(light);
     } else {
-      devicesCopy[index] = device;
+      devicesCopy[index] = light;
     }
-    setDevices(devicesCopy);
+    setLights(devicesCopy);
   });
 
   return <></>;
@@ -32,11 +32,11 @@ function Test() {
 
 export default function App() {
 
-  const { devices } = useDevices();
+  const { lights } = useLights();
 
   useEffect(() => {
     setWindowSize();
-  }, [devices]);
+  }, [lights]);
 
   useEffect(() => {
     window.addEventListener('contextmenu', e => e.preventDefault());
@@ -49,7 +49,7 @@ export default function App() {
         <Test/>
         <Routes>
           <Route path="/" element={<Lights/>}/>
-          <Route path="/:mac" element={<Light/>}/>
+          <Route path="/:mac" element={<LightView/>}/>
         </Routes>
       </BrowserRouter>
     </div>

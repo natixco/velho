@@ -1,4 +1,4 @@
-import { Device } from '../models';
+import { Light } from '../models';
 import { atom } from 'jotai';
 
-export const devicesAtom = atom<Device[]>([]);
+export const lightsAtom = atom<Light[]>([]);

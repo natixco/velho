@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 use tauri::{AppHandle, Config, Env, Manager, PackageInfo};
 use tauri::api::path::{BaseDirectory, resolve_path};
 
-use crate::device::Device;
+use crate::light::Light;
 
 static STORAGE_FILE_NAME: &str = "data.json";
 
@@ -16,31 +16,31 @@ pub struct AppInfo {
 
 pub struct Storage {
     app: AppInfo,
-    devices: Mutex<Vec<Device>>,
+    lights: Mutex<Vec<Light>>,
 }
 
 impl Storage {
     pub fn new(app: AppInfo) -> std::io::Result<Self> {
         Ok(Self {
             app,
-            devices: Mutex::new(Vec::new()),
+            lights: Mutex::new(Vec::new()),
         })
     }
 
-    pub fn get_devices(&self) -> Vec<Device> {
-        let devices = self.devices.lock().unwrap();
-        devices.to_vec()
+    pub fn get_lights(&self) -> Vec<Light> {
+        let lights = self.lights.lock().unwrap();
+        lights.to_vec()
     }
 
-    pub fn upsert_device(&self, device: Device) -> () {
-        let device_clone = device.clone();
-        let mut devices = self.devices.lock().unwrap();
-        match devices.iter().position(|d| d.mac == device.mac) {
-            Some(index) => devices[index] = device,
-            None => devices.push(device),
+    pub fn upsert_light(&self, light: Light) -> () {
+        let device_clone = light.clone();
+        let mut lights = self.lights.lock().unwrap();
+        match lights.iter().position(|d| d.state.mac == light.state.mac) {
+            Some(index) => lights[index] = light,
+            None => lights.push(light),
         }
-        self.app.handle.get_window("main").unwrap().emit("upsert_device", device_clone).unwrap();
-        self.save(devices.to_vec());
+        self.app.handle.get_window("main").unwrap().emit("upsert_light", device_clone).unwrap();
+        self.save(lights.to_vec());
     }
 
     pub fn load(&mut self) -> () {
@@ -48,8 +48,8 @@ impl Storage {
         let json = std::fs::read_to_string(path);
         match json {
             Ok(json) => {
-                let mut devices: Vec<Device> = serde_json::from_str(&json).unwrap();
-                self.devices.lock().unwrap().append(&mut devices);
+                let mut lights: Vec<Light> = serde_json::from_str(&json).unwrap();
+                self.lights.lock().unwrap().append(&mut lights);
             }
             Err(error) => {
                 println!("Error: {}", error);
@@ -57,10 +57,10 @@ impl Storage {
         }
     }
 
-    fn save(&self, devices: Vec<Device>) -> () {
+    fn save(&self, lights: Vec<Light>) -> () {
         self.ensure_storage_file();
 
-        let json = serde_json::to_string(&devices).unwrap();
+        let json = serde_json::to_string(&lights).unwrap();
         let path = self.get_storage_path();
         if let Err(error) = std::fs::write(path, json) {
             println!("Error: {}", error);

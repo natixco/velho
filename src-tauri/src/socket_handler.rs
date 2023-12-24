@@ -5,7 +5,7 @@ use std::time::Duration;
 use serde_json::{json, Value};
 use tauri::{AppHandle, Manager};
 
-use crate::device::Device;
+use crate::light::Light;
 use crate::storage::Storage;
 
 static LOCAL_ADDRESS: &str = "0.0.0.0";
@@ -47,8 +47,8 @@ impl SocketHandler {
 
             if let Some(result) = object.get("result") {
                 if result.get("success").is_none() {
-                    let new_device = Device::new(src.to_string(), result);
-                    app_handle.state::<Storage>().upsert_device(new_device);
+                    let new_device = Light::new(src.to_string(), result);
+                    app_handle.state::<Storage>().upsert_light(new_device);
                 }
             }
         });

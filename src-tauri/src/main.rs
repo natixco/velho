@@ -7,17 +7,17 @@ use std::sync::{Arc, Mutex};
 
 use tauri::Manager;
 
-use crate::device_controller::DeviceController;
-use crate::device_controller_wrapper::DeviceControllerWrapper;
+use crate::light_controller::LightController;
+use crate::light_controller_wrapper::LightControllerWrapper;
 use crate::socket_handler::SocketHandler;
 use crate::storage::{AppInfo, Storage};
 
-mod device;
+mod light;
 mod storage;
 mod commands;
-mod device_controller;
 mod socket_handler;
-mod device_controller_wrapper;
+mod light_controller;
+mod light_controller_wrapper;
 
 fn main() {
     tauri::Builder::default()
@@ -34,14 +34,14 @@ fn main() {
             socket_handler.start_listen(app.handle().clone());
 
             app.manage(storage);
-            app.manage(DeviceControllerWrapper {
-                controller: Arc::new(Mutex::new(DeviceController::new(Arc::new(Mutex::new(socket_handler))))),
+            app.manage(LightControllerWrapper {
+                controller: Arc::new(Mutex::new(LightController::new(Arc::new(Mutex::new(socket_handler))))),
             });
 
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            commands::get_devices,
+            commands::get_lights,
             commands::set_pilot,
         ])
         .run(tauri::generate_context!())

@@ -1,4 +1,4 @@
-import { Device } from '../models';
+import { LightState } from '../models';
 import Toggle from './Toggle';
 import { setPilot, setState } from '../utils';
 import { useEffect, useState } from 'react';
@@ -6,7 +6,7 @@ import clsx from 'clsx';
 import ContextMenuComponent from './ContextMenuComponent';
 
 interface Props {
-  device: Device;
+  device: LightState;
 }
 
 export default function DeviceComponent(props: Props) {
