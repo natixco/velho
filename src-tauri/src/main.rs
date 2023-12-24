@@ -43,6 +43,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             commands::get_lights,
             commands::set_pilot,
+            commands::update_light,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

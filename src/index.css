@@ -12,7 +12,11 @@
 
 * {
   -webkit-user-drag: none;
-  @apply transition-all outline-none cursor-default select-none
+  @apply transition-all outline-none select-none
+}
+
+a, button {
+  @apply cursor-default
 }
 
 body {

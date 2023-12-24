@@ -11,7 +11,7 @@ pub struct LightController {
 impl LightController {
     pub fn new(socket_handler: Arc<Mutex<SocketHandler>>) -> Self {
         Self {
-            socket_handler
+            socket_handler,
         }
     }
 

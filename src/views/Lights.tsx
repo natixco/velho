@@ -26,7 +26,7 @@ export default function Lights() {
                 )}>
             <p className={clsx(
               'text-xl font-bold transition-none text-zinc-100',
-            )}>{light.state.mac}</p>
+            )}>{light.name}</p>
             <p className={clsx(
               'text-sm font-medium transition-none text-zinc-200',
             )}>

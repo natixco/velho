@@ -1,22 +1,37 @@
 import { Link, useParams } from 'react-router-dom';
 import clsx from 'clsx';
-import { ChangeEvent } from 'react';
+import { ChangeEvent, useRef, useState } from 'react';
 import { useLights } from '../hooks/useLights';
+import { useClickAway } from '@uidotdev/usehooks';
 
 export default function LightView() {
 
-  const { lights, setPilot } = useLights();
+  const { lights, setPilot, updateLight } = useLights();
   const { mac } = useParams();
   const light = lights.find(x => x.state.mac === mac)!;
 
+  const nameRef = useClickAway<HTMLHeadingElement>(async () => {
+    if (!rename.enabled) {
+      return;
+    }
+
+    setRename({ enabled: false, name: '' });
+    if (rename.name) {
+      await updateLight(light, { name: rename.name });
+    }
+  });
+  const [rename, setRename] = useState({ enabled: false, name: '' });
+
   async function toggle() {
-    const state = !light.state.state;
-    await setPilot(light, { state });
+    await setPilot(light, { state: !light.state.state });
   }
 
   async function setDimming(e: ChangeEvent<HTMLInputElement>) {
-    const dimming = parseInt(e.target.value);
-    await setPilot(light, { dimming });
+    await setPilot(light, { dimming: parseInt(e.target.value) });
+  }
+
+  async function enableRename() {
+    setRename({ enabled: true, name: light.name });
   }
 
   return (
@@ -33,11 +48,21 @@ export default function LightView() {
           className="font-medium text-sm text-zinc-900 group-hover:text-indigo-500 transition-none">Back to lights</span>
       </Link>
 
-      <div className="flex flex-row items-start justify-between gap-4">
-        <h1 className="text-2xl font-black text-zinc-900">{light.state.mac}</h1>
+      <div className="w-full flex flex-row items-start justify-between gap-4">
+        <h1 ref={nameRef}
+            className={clsx(
+              'border-2 p-0.5 rounded-md text-2xl font-black text-zinc-900 cursor-text break-all',
+              rename.enabled ? 'border-indigo-500' : 'border-transparent'
+            )}
+            spellCheck={false}
+            contentEditable={rename.enabled}
+            onClick={() => enableRename()}
+            onInput={(e: any) => setRename({ enabled: true, name: e.target.textContent })}
+            dangerouslySetInnerHTML={{ __html: light.name }}>
+        </h1>
         <button onClick={() => toggle()}
                 className={clsx(
-                  'h-12 w-12 min-w-12 flex flex-col items-center justify-center group border cursor-default rounded-xl hover:scale-105',
+                  'h-12 w-12 min-w-12 flex flex-col items-center justify-center group border rounded-xl hover:scale-105',
                   light.state.state ? 'bg-indigo-500' : 'bg-zinc-900'
                 )}>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"

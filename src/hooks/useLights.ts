@@ -6,7 +6,7 @@ import { invoke } from '@tauri-apps/api';
 export function useLights() {
   const [lights, setLights] = useAtom(lightsAtom);
 
-  function updateLight(light: Light, params: Partial<LightState>) {
+  function setLightState(light: Light, params: Partial<LightState>) {
     const index = lights.findIndex(d => d.state.ip === light.state.ip);
     if (index === -1) {
       return;
@@ -36,7 +36,20 @@ export function useLights() {
     });
 
     if (success) {
-      updateLight(light, params);
+      setLightState(light, params);
+    }
+
+    return success;
+  }
+
+  async function updateLight(light: Light, params: {name?: string}) {
+    const success = await invoke<boolean>('update_light', {
+      mac: light.state.mac,
+      params: params,
+    });
+
+    if (success) {
+      refreshLights();
     }
 
     return success;
@@ -47,5 +60,6 @@ export function useLights() {
     setLights,
     refreshLights,
     setPilot,
+    updateLight,
   };
 }

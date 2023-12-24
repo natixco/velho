@@ -21,3 +21,10 @@ pub fn set_pilot(light_controller_wrapper: tauri::State<LightControllerWrapper>,
         Err(_) => false,
     }
 }
+
+#[tauri::command]
+pub fn update_light(storage: tauri::State<Storage>,
+                    mac: String,
+                    params: serde_json::Value) -> bool {
+    storage.update_light(mac, params)
+}
