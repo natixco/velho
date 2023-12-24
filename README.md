@@ -1,7 +1,7 @@
 # velho
 
 Velho (wizard in Finnish) is a desktop application developed using Tauri and React. 
-It provides a user interface for controlling Philips Wiz smart lights on the same network as your device is on. 
+It provides a user interface for controlling Philips Wiz smart lights on the same network as your device is on.
 
 ## Features
 - [x] Discover lights on the network automatically
@@ -13,6 +13,10 @@ It provides a user interface for controlling Philips Wiz smart lights on the sam
 - [ ] Create/edit/toggle custom scenes for lights
 - [ ] Create/edit custom groups of lights
 - [ ] Control groups of lights
+
+## Screenshots
+![](https://raw.githubusercontent.com/natixco/velho/main/screenshots/lights.png)
+![](https://raw.githubusercontent.com/natixco/velho/main/screenshots/light.png)
 
 ## Installation
 ### Prerequisites
