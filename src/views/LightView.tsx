@@ -34,6 +34,14 @@ export default function LightView() {
     setRename({ enabled: true, name: light.name });
   }
 
+  function decreaseDimming() {
+    setPilot(light, { dimming: light.state.dimming - 1 });
+  }
+
+  function increaseDimming() {
+    setPilot(light, { dimming: light.state.dimming + 1 });
+  }
+
   return (
     <div className="flex flex-col justify-end gap-2">
       <Link to="/" className="flex flex-row items-center gap-0.5 group pb-2">
@@ -51,7 +59,7 @@ export default function LightView() {
       <div className="w-full flex flex-row items-start justify-between gap-4">
         <h1 ref={nameRef}
             className={clsx(
-              'border-2 p-0.5 rounded-md text-2xl font-black text-zinc-900 cursor-text break-all',
+              '-ml-1 border-2 p-0.5 rounded-md text-2xl font-black text-zinc-900 cursor-text break-all',
               rename.enabled ? 'border-indigo-500' : 'border-transparent'
             )}
             spellCheck={false}
@@ -77,9 +85,35 @@ export default function LightView() {
         </button>
       </div>
 
-      <div className="rounded-xl p-4 bg-zinc-300 flex flex-col gap-2">
+      <div className="rounded-xl flex flex-col gap-2">
         <p className="font-bold text-zinc-900">Brightness</p>
-        <input type="range" min={10} max={100} step={1} value={light.state.dimming} onChange={e => setDimming(e)}/>
+        <div className="h-10 grid grid-rows-1 grid-cols-[2.5rem_1fr_2.5rem] gap-2 items-center">
+          <button onClick={() => decreaseDimming()}
+                  className="h-full flex flex-row items-center justify-center rounded-xl bg-indigo-500/20 hover:scale-105 active:scale-95">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
+                 stroke="currentColor" className="h-[22px] text-indigo-500">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14"/>
+            </svg>
+          </button>
+          <input type="range" min={10} max={100} step={1} value={light.state.dimming}
+                 onChange={e => setDimming(e)}
+                 className={clsx(
+                   'appearance-none w-full h-2 bg-zinc-300 rounded-full outline-none',
+                   '[&::-webkit-slider-thumb]:appearance-none',
+                   '[&::-webkit-slider-thumb]:w-4',
+                   '[&::-webkit-slider-thumb]:h-4',
+                   '[&::-webkit-slider-thumb]:rounded-full',
+                   '[&::-webkit-slider-thumb]:bg-indigo-500',
+                   'active:[&::-webkit-slider-thumb]:scale-[120%]',
+                 )}/>
+          <button onClick={() => increaseDimming()}
+                  className="h-full flex flex-row items-center justify-center rounded-xl bg-indigo-500/20 hover:scale-105 active:scale-95">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
+                 stroke="currentColor" className="h-[22px] text-indigo-500">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
     </div>
