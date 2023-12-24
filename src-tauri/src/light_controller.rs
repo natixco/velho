@@ -19,10 +19,6 @@ impl LightController {
         self.socket_handler.lock().unwrap().broadcast_get_pilot();
     }
 
-    pub fn set_state(&self, ip: String, state: bool) -> () {
-        self.send_event("setState", ip, json!({"state": state}));
-    }
-
     pub fn set_pilot(&self, ip: String, params: Value) -> () {
         self.send_event("setPilot", ip, params);
     }

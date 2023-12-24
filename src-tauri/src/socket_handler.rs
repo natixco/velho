@@ -1,6 +1,5 @@
 use std::net::UdpSocket;
 use std::thread;
-use std::time::Duration;
 
 use serde_json::{json, Value};
 use tauri::{AppHandle, Manager};
@@ -15,7 +14,6 @@ static PORT: &str = "38899";
 pub struct SocketHandler {
     pub socket: UdpSocket,
     started_listen: bool,
-    started_auto_update: bool,
 }
 
 impl SocketHandler {
@@ -25,7 +23,6 @@ impl SocketHandler {
         Ok(Self {
             socket,
             started_listen: false,
-            started_auto_update: false,
         })
     }
 
