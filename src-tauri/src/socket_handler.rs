@@ -41,7 +41,6 @@ impl SocketHandler {
             println!("Received data: {}", data);
 
             let object: Value = serde_json::from_str(&data).unwrap();
-
             if let Some(result) = object.get("result") {
                 if result.get("success").is_none() {
                     let new_device = Light::new(src.to_string(), result);

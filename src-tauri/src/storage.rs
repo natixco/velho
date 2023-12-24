@@ -48,23 +48,25 @@ impl Storage {
             self.app.handle.get_window("main").unwrap().emit("upsert_light", new_light_clone).unwrap();
         }
 
-        self.save(lights.to_vec());
+        drop(lights);
+        self.save();
     }
 
     pub fn update_light(&self, mac: String, params: Value) -> bool {
-        if let Ok(mut lights) = self.lights.lock() {
-            if let Some(index) = lights.iter().position(|d| d.state.mac == mac) {
-                if let Some(name) = params.get("name") {
-                    lights[index].name = name
-                        .as_str()
-                        .map_or_else(|| lights[index].state.mac.clone(), |s| s.to_string());
-                }
+        let mut lights = self.lights.lock().unwrap();
 
-                return true;
+        if let Some(index) = lights.iter().position(|d| d.state.mac == mac) {
+            if let Some(name) = params.get("name") {
+                lights[index].name = name
+                    .as_str()
+                    .map_or_else(|| lights[index].state.mac.clone(), |s| s.to_string());
             }
 
-            self.save(lights.to_vec());
+            return true;
         }
+
+        drop(lights);
+        self.save();
 
         false
     }
@@ -78,10 +80,10 @@ impl Storage {
         }
     }
 
-    fn save(&self, lights: Vec<Light>) -> () {
+    fn save(&self) -> () {
         self.ensure_storage_file();
 
-        let json = serde_json::to_string(&lights).unwrap();
+        let json = serde_json::to_string(&self.lights.lock().unwrap().to_vec()).unwrap();
         let path = self.get_storage_path();
         if let Err(error) = std::fs::write(path, json) {
             println!("Error while saving storage: {}", error);

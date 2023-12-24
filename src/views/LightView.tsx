@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
 import clsx from 'clsx';
-import { ChangeEvent, useRef, useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { useLights } from '../hooks/useLights';
 import { useClickAway } from '@uidotdev/usehooks';
 
