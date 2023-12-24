@@ -8,7 +8,7 @@ import { Light } from '../models';
 interface SliderProps {
   title: string;
   light: Light;
-  subtitle: () => string;
+  subtitle: string;
   onDecrease: () => void;
   onIncrease: () => void;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
@@ -16,7 +16,7 @@ interface SliderProps {
     min: number;
     max: number;
     step: number;
-    value: () => number;
+    value: number;
   };
 }
 
@@ -25,7 +25,7 @@ function Slider(props: SliderProps) {
     <div className="rounded-xl flex flex-col gap-2">
       <div className="flex flex-row items-center gap-2">
         <p className="font-bold text-zinc-900">{props.title}</p>
-        <span className="font-medium text-sm text-zinc-500">{props.subtitle()}</span>
+        <span className="font-medium text-sm text-zinc-500">{props.subtitle}</span>
       </div>
       <div className="h-10 grid grid-rows-1 grid-cols-[2.5rem_1fr_2.5rem] gap-2 items-center">
         <button onClick={() => props.onDecrease()}
@@ -36,7 +36,7 @@ function Slider(props: SliderProps) {
           </svg>
         </button>
         <input type="range" min={props.input.min} max={props.input.max} step={props.input.step}
-               value={props.input.value()}
+               value={props.input.value}
                onChange={e => props.onChange(e)}
                className={clsx(
                  'appearance-none w-full h-2 bg-zinc-300 rounded-full outline-none',
@@ -128,7 +128,7 @@ export default function LightView() {
 
         <Slider title="Temperature"
                 light={light}
-                subtitle={() => `${light.state.temp}K`}
+                subtitle={`${light.state.temp}K`}
                 onDecrease={() => setPilot(light, { temp: light.state.temp - 100 })}
                 onIncrease={() => setPilot(light, { temp: light.state.temp + 100 })}
                 onChange={e => setPilot(light, { temp: parseInt(e.target.value) })}
@@ -136,12 +136,12 @@ export default function LightView() {
                   min: 2200,
                   max: 6500,
                   step: 100,
-                  value: () => light.state.temp,
+                  value: light.state.temp,
                 }}/>
 
         <Slider title="Brightness"
                 light={light}
-                subtitle={() => `${light.state.dimming}%`}
+                subtitle={`${light.state.dimming}%`}
                 onDecrease={() => setPilot(light, { dimming: light.state.dimming - 1 })}
                 onIncrease={() => setPilot(light, { dimming: light.state.dimming + 1 })}
                 onChange={e => setPilot(light, { dimming: parseInt(e.target.value) })}
@@ -149,7 +149,7 @@ export default function LightView() {
                   min: 10,
                   max: 100,
                   step: 1,
-                  value: () => light.state.dimming,
+                  value: light.state.dimming,
                 }}/>
       </div>
 
