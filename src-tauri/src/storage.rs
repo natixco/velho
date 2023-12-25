@@ -33,22 +33,21 @@ impl Storage {
         lights.to_vec()
     }
 
-    pub fn upsert_light(&self, light: Light) -> () {
+    pub fn upsert_light(&self, mut light: Light) -> () {
         let mut lights = self.lights.lock().unwrap();
-
-        if let Some(index) = lights.iter().position(|d| d.state.mac == light.state.mac) {
-            lights[index].state = light.state;
-            lights[index].available = true;
-            let light_clone = lights[index].clone();
-            self.app.handle.get_window("main").unwrap().emit("upsert_light", light_clone).unwrap();
+        let _light;
+        if let Some(existing_light) = lights.iter_mut().find(|d| d.state.mac == light.state.mac) {
+            existing_light.state = light.state;
+            existing_light.available = true;
+            _light = existing_light;
         } else {
-            let mut new_light = light.clone();
-            new_light.name = light.state.mac;
-            new_light.available = true;
-            let new_light_clone = new_light.clone();
-            lights.push(new_light);
-            self.app.handle.get_window("main").unwrap().emit("upsert_light", new_light_clone).unwrap();
+            light.name = light.state.mac.clone();
+            light.available = true;
+            lights.push(light.clone());
+            _light = &mut light;
         }
+
+        self.app.handle.get_window("main").unwrap().emit("upsert_light", _light.clone()).unwrap();
 
         drop(lights);
         self.save();
@@ -57,11 +56,11 @@ impl Storage {
     pub fn update_light(&self, mac: String, params: Value) -> bool {
         let mut lights = self.lights.lock().unwrap();
 
-        if let Some(index) = lights.iter().position(|d| d.state.mac == mac) {
+        if let Some(light) = lights.iter_mut().find(|d| d.state.mac == mac) {
             if let Some(name) = params.get("name") {
-                lights[index].name = name
+                light.name = name
                     .as_str()
-                    .map_or_else(|| lights[index].state.mac.clone(), |s| s.to_string());
+                    .map_or_else(|| light.state.mac.clone(), |s| s.to_string());
             }
 
             return true;
