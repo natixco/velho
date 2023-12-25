@@ -129,8 +129,16 @@ export default function LightView() {
         <Slider title="Temperature"
                 light={light}
                 subtitle={`${light.state.temp}K`}
-                onDecrease={() => setPilot(light, { temp: light.state.temp - 100 })}
-                onIncrease={() => setPilot(light, { temp: light.state.temp + 100 })}
+                onDecrease={() => {
+                  if (light.state.temp > 2200) {
+                    void setPilot(light, { temp: light.state.temp - 100 })
+                  }
+                }}
+                onIncrease={() => {
+                  if (light.state.temp < 6500) {
+                    void setPilot(light, { temp: light.state.temp + 100 })
+                  }
+                }}
                 onChange={e => setPilot(light, { temp: parseInt(e.target.value) })}
                 input={{
                   min: 2200,
@@ -142,8 +150,16 @@ export default function LightView() {
         <Slider title="Brightness"
                 light={light}
                 subtitle={`${light.state.dimming}%`}
-                onDecrease={() => setPilot(light, { dimming: light.state.dimming - 1 })}
-                onIncrease={() => setPilot(light, { dimming: light.state.dimming + 1 })}
+                onDecrease={() => {
+                  if (light.state.dimming > 10) {
+                    void setPilot(light, { dimming: light.state.dimming - 1 })
+                  }
+                }}
+                onIncrease={() => {
+                  if (light.state.dimming < 100) {
+                    void setPilot(light, { dimming: light.state.dimming + 1 })
+                  }
+                }}
                 onChange={e => setPilot(light, { dimming: parseInt(e.target.value) })}
                 input={{
                   min: 10,
