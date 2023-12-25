@@ -7,8 +7,8 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "tauri-app",
-    "version": "0.1.0"
+    "productName": "velho",
+    "version": "0.0.0"
   },
   "tauri": {
     "allowlist": {
@@ -67,11 +67,11 @@
     },
     "windows": [
       {
-        "fullscreen": false,
+        "title": "velho",
         "height": 250,
-        "resizable": false,
-        "title": "Tauri App",
         "width": 400,
+        "fullscreen": false,
+        "resizable": false,
         "transparent": true,
         "decorations": false
       }
