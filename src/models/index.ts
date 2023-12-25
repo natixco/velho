@@ -9,5 +9,6 @@ export interface LightState {
 
 export interface Light {
   name: string;
+  available: boolean;
   state: LightState;
 }

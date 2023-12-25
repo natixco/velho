@@ -5,7 +5,9 @@ use crate::storage::Storage;
 #[tauri::command]
 pub fn get_lights(storage: tauri::State<Storage>,
                   light_controller_wrapper: tauri::State<LightControllerWrapper>) -> Vec<Light> {
-    light_controller_wrapper.controller.lock().unwrap().refresh_devices();
+    if let Ok(controller) = light_controller_wrapper.controller.lock() {
+        controller.refresh_devices();
+    }
     storage.get_lights()
 }
 
@@ -13,13 +15,12 @@ pub fn get_lights(storage: tauri::State<Storage>,
 pub fn set_pilot(light_controller_wrapper: tauri::State<LightControllerWrapper>,
                  ip: String,
                  params: serde_json::Value) -> bool {
-    match light_controller_wrapper.controller.lock() {
-        Ok(controller) => {
-            controller.set_pilot(ip, params);
-            true
-        }
-        Err(_) => false,
+    if let Ok(controller) = light_controller_wrapper.controller.lock() {
+        controller.set_pilot(ip, params);
+        return true;
     }
+
+    false
 }
 
 #[tauri::command]

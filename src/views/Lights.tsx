@@ -2,6 +2,7 @@ import { Light } from '../models';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
 import { useLights } from '../hooks/useLights';
+import { Fragment } from 'react';
 
 export default function Lights() {
 
@@ -12,27 +13,46 @@ export default function Lights() {
     await setPilot(light, { state });
   }
 
+  function getLightElement(light: Light) {
+    if (light.available) {
+      return (
+        <Link key={light.state.mac}
+              to={`/${light.state.mac}`}
+              onContextMenu={() => onContextMenu(light)}
+              className={clsx(
+                'rounded-xl p-4 flex flex-col items-start justify-between gap-2 hover:scale-105',
+                light.state.state ? 'bg-indigo-500' : 'bg-zinc-900'
+              )}>
+          <p className="text-xl font-bold transition-none text-zinc-100">
+            {light.name}
+          </p>
+          <p className="text-sm font-medium transition-none text-zinc-200">
+            {light.state.state ? 'On' : 'Off'}
+          </p>
+        </Link>
+      );
+    }
+
+    return (
+      <div className="rounded-xl p-4 flex flex-col items-start justify-between gap-2 bg-zinc-500">
+        <p className="text-xl font-bold transition-none text-zinc-100">
+          {light.name}
+        </p>
+        <p className="text-sm font-medium transition-none text-zinc-200">
+          Unavailable
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-black text-zinc-900">Lights</h1>
       <div className="grid grid-flow-row grid-cols-2 gap-2">
         {lights.map((light, i) => (
-          <Link key={light.state.mac}
-                to={`/${light.state.mac}`}
-                onContextMenu={() => onContextMenu(light)}
-                className={clsx(
-                  'rounded-xl p-4 flex flex-col items-start justify-between gap-2 hover:scale-105',
-                  light.state.state ? 'bg-indigo-500' : 'bg-zinc-900'
-                )}>
-            <p className={clsx(
-              'text-xl font-bold transition-none text-zinc-100',
-            )}>{light.name}</p>
-            <p className={clsx(
-              'text-sm font-medium transition-none text-zinc-200',
-            )}>
-              {light.state.state ? 'On' : 'Off'}
-            </p>
-          </Link>
+          <Fragment key={light.state.mac}>
+            {getLightElement(light)}
+          </Fragment>
         ))}
       </div>
     </div>

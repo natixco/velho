@@ -13,6 +13,7 @@ pub struct LightState {
 #[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub struct Light {
     pub name: String,
+    pub available: bool,
     pub state: LightState,
 }
 
@@ -27,6 +28,7 @@ impl Light {
     pub fn new(ip: String, params: &Value) -> Self {
         Self {
             name: String::new(),
+            available: false,
             state: LightState {
                 ip,
                 mac: String::from(params.get("mac").unwrap().as_str().unwrap()),

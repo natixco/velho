@@ -38,11 +38,13 @@ impl Storage {
 
         if let Some(index) = lights.iter().position(|d| d.state.mac == light.state.mac) {
             lights[index].state = light.state;
+            lights[index].available = true;
             let light_clone = lights[index].clone();
             self.app.handle.get_window("main").unwrap().emit("upsert_light", light_clone).unwrap();
         } else {
             let mut new_light = light.clone();
             new_light.name = light.state.mac;
+            new_light.available = true;
             let new_light_clone = new_light.clone();
             lights.push(new_light);
             self.app.handle.get_window("main").unwrap().emit("upsert_light", new_light_clone).unwrap();
