@@ -9,6 +9,7 @@ use tauri::Manager;
 
 use crate::light_controller::LightController;
 use crate::light_controller_wrapper::LightControllerWrapper;
+use crate::light_storage::LightStorage;
 use crate::socket_handler::SocketHandler;
 use crate::storage::{AppInfo, Storage};
 
@@ -18,22 +19,22 @@ mod commands;
 mod socket_handler;
 mod light_controller;
 mod light_controller_wrapper;
+mod light_storage;
 
 fn main() {
     tauri::Builder::default()
         .setup(move |app| {
-            let mut storage = Storage::new(AppInfo {
+            let storage = Storage::new(AppInfo {
                 handle: app.handle().clone(),
                 config: app.config().clone(),
                 package_info: app.package_info().clone(),
                 env: app.env().clone(),
             })?;
-            storage.load();
 
             let mut socket_handler = SocketHandler::new()?;
             socket_handler.start_listen(app.handle().clone());
 
-            app.manage(storage);
+            app.manage(LightStorage::new(app.handle().clone(), storage));
             app.manage(LightControllerWrapper {
                 controller: Arc::new(Mutex::new(LightController::new(Arc::new(Mutex::new(socket_handler))))),
             });

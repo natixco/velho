@@ -1,9 +1,9 @@
 use crate::light::Light;
+use crate::light_storage::LightStorage;
 use crate::LightControllerWrapper;
-use crate::storage::Storage;
 
 #[tauri::command]
-pub fn get_lights(storage: tauri::State<Storage>,
+pub fn get_lights(storage: tauri::State<LightStorage>,
                   light_controller_wrapper: tauri::State<LightControllerWrapper>) -> Vec<Light> {
     if let Ok(controller) = light_controller_wrapper.controller.lock() {
         controller.refresh_devices();
@@ -24,7 +24,7 @@ pub fn set_pilot(light_controller_wrapper: tauri::State<LightControllerWrapper>,
 }
 
 #[tauri::command]
-pub fn update_light(storage: tauri::State<Storage>,
+pub fn update_light(storage: tauri::State<LightStorage>,
                     mac: String,
                     params: serde_json::Value) -> bool {
     storage.update_light(mac, params)

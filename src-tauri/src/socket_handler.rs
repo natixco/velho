@@ -5,7 +5,7 @@ use serde_json::{json, Value};
 use tauri::{AppHandle, Manager};
 
 use crate::light::Light;
-use crate::storage::Storage;
+use crate::light_storage::LightStorage;
 
 static LOCAL_ADDRESS: &str = "0.0.0.0";
 static BROADCAST_ADDRESS: &str = "255.255.255.255";
@@ -44,7 +44,7 @@ impl SocketHandler {
             if let Some(result) = object.get("result") {
                 if result.get("success").is_none() {
                     let new_device = Light::new(src.to_string(), result);
-                    app_handle.state::<Storage>().upsert_light(new_device);
+                    app_handle.state::<LightStorage>().upsert_light(new_device);
                 }
             }
         });
