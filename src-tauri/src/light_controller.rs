@@ -30,7 +30,7 @@ impl LightController {
         });
         match self.socket_handler.lock() {
             Ok(handler) => {
-                handler.socket.send_to(data.to_string().as_bytes(), device_ip).unwrap();
+                handler.send_data(data.to_string().as_bytes(), device_ip).unwrap();
             }
             Err(error) => println!("Error: {}", error),
         }

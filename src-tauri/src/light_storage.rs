@@ -50,11 +50,9 @@ impl LightStorage {
         let mut lights = self.lights.lock().unwrap();
 
         if let Some(light) = lights.iter_mut().find(|d| d.state.mac == mac) {
-            if let Some(name) = params.get("name") {
-                light.name = name
-                    .as_str()
-                    .map_or_else(|| light.state.mac.clone(), |s| s.to_string());
-            }
+            light.name = params.get("name")
+                .and_then(Value::as_str)
+                .map_or_else(|| light.state.mac.clone(), |s| s.to_string());
 
             return true;
         }
