@@ -61,7 +61,7 @@ function Slider(props: SliderProps) {
 
 export default function LightView() {
 
-  const { lights, setPilot, updateLight } = useLights();
+  const { lights, setPilot, updateLight, refreshLights } = useLights();
   const { mac } = useParams();
   const light = lights.find(x => x.state.mac === mac)!;
 
@@ -82,18 +82,29 @@ export default function LightView() {
   }
 
   return (
-    <div className="flex flex-col justify-end gap-2">
-      <Link to="/" className="flex flex-row items-center gap-0.5 group pb-2">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-             className="h-[20px] text-zinc-900 group-hover:text-indigo-500 transition-none">
-          <path className="transition-none"
-                fillRule="evenodd"
-                d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"
-                clipRule="evenodd"/>
-        </svg>
-        <span
-          className="font-medium text-sm text-zinc-900 group-hover:text-indigo-500 transition-none">Back to lights</span>
-      </Link>
+    <div className="flex flex-col gap-4">
+      <div className="h-6 flex flex-row items-center justify-between">
+        <Link to="/" className="flex flex-row items-center gap-0.5 group">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+               className="h-[20px] text-zinc-900 group-hover:text-indigo-500 transition-none">
+            <path className="transition-none"
+                  fillRule="evenodd"
+                  d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"
+                  clipRule="evenodd"/>
+          </svg>
+          <span
+            className="font-medium text-sm text-zinc-900 group-hover:text-indigo-500 transition-none">Back to lights</span>
+        </Link>
+        <button className="flex flex-row items-center gap-2 group active:scale-95" onClick={() => refreshLights()}>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
+               stroke="currentColor" className="h-[18px] text-zinc-900 group-hover:text-indigo-500 transition-transform">
+            <path strokeLinecap="round" strokeLinejoin="round"
+                  d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
+                  className="transition-none"/>
+          </svg>
+          <p className="font-bold text-sm text-zinc-900 group-hover:text-indigo-500 transition-none">Refresh</p>
+        </button>
+      </div>
 
       <div className="flex flex-col gap-4">
 
