@@ -68,7 +68,7 @@
     "windows": [
       {
         "title": "velho",
-        "height": 250,
+        "height": 350,
         "width": 400,
         "fullscreen": false,
         "resizable": false,

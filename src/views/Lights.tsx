@@ -51,21 +51,24 @@ export default function Lights() {
         <h1 className="text-xl font-black text-zinc-900">Lights</h1>
         <button className="flex flex-row items-center gap-2 group active:scale-95" onClick={() => refreshLights()}>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
-               stroke="currentColor" className="h-[18px] text-zinc-900 group-hover:text-indigo-500 transition-transform">
+               stroke="currentColor"
+               className="h-[18px] text-zinc-900 group-hover:text-indigo-500 transition-transform">
             <path strokeLinecap="round" strokeLinejoin="round"
                   d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
-            className="transition-none"/>
+                  className="transition-none"/>
           </svg>
           <p className="font-bold text-sm text-zinc-900 group-hover:text-indigo-500 transition-none">Refresh</p>
         </button>
       </div>
 
-      <div className="grid grid-flow-row grid-cols-2 gap-2">
-        {lights.map((light, i) => (
-          <Fragment key={light.state.mac}>
-            {getLightElement(light)}
-          </Fragment>
-        ))}
+      <div className="h-[280px] overflow-x-hidden overflow-y-scroll py-4 px-2">
+        <div className="grid grid-flow-row grid-cols-2 gap-2">
+          {lights.map((light, i) => (
+            <Fragment key={light.state.mac}>
+              {getLightElement(light)}
+            </Fragment>
+          ))}
+        </div>
       </div>
     </div>
   );

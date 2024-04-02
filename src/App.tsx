@@ -43,8 +43,7 @@ export default function App() {
   }, []);
 
   return (
-    <div data-tauri-drag-region
-         className="container h-full w-full py-4 px-4 bg-zinc-100 rounded-xl flex flex-col gap-4 relative">
+    <div className="h-[350px] w-full py-4 px-4 bg-zinc-100 rounded-xl flex flex-col gap-4 relative">
       <BrowserRouter>
         <Test/>
         <Routes>
