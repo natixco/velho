@@ -29,8 +29,10 @@ impl Storage {
         let path = self.get_storage_path();
         let json = std::fs::read_to_string(path);
         if let Ok(json) = json {
-            let lights: Vec<Light> = serde_json::from_str(&json).unwrap();
-            return lights;
+            match serde_json::from_str::<Vec<Light>>(&json) {
+                Ok(lights) => return lights,
+                Err(error) => println!("Error while parsing storage: {}", error),
+            }
         } else {
             println!("Error while loading storage: {}", json.unwrap_err());
         }

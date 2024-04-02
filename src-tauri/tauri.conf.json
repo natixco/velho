@@ -73,8 +73,13 @@
         "fullscreen": false,
         "resizable": false,
         "transparent": true,
-        "decorations": false
+        "decorations": false,
+        "skipTaskbar": true
       }
-    ]
+    ],
+    "systemTray": {
+      "iconPath": "icons/icon.png",
+      "iconAsTemplate": true
+    }
   }
 }
