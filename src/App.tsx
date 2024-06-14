@@ -1,7 +1,6 @@
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import Lights from './views/Lights';
 import { useEffect } from 'react';
-import { setWindowSize } from './utils/window';
 import { useLights } from './hooks/useLights';
 import { useEvent } from './hooks/useEvent';
 import { Light } from './models';
@@ -12,7 +11,6 @@ function Test() {
   const { lights, refreshLights, setLights } = useLights();
 
   useEffect(() => {
-    setWindowSize();
     refreshLights();
   }, [location.pathname]);
 
@@ -32,18 +30,12 @@ function Test() {
 
 export default function App() {
 
-  const { lights } = useLights();
-
-  useEffect(() => {
-    setWindowSize();
-  }, [lights]);
-
   useEffect(() => {
     window.addEventListener('contextmenu', e => e.preventDefault());
   }, []);
 
   return (
-    <div className="h-[350px] w-full py-4 px-4 bg-zinc-100 rounded-xl flex flex-col gap-4 relative">
+    <div data-tauri-drag-region className="w-full py-4 px-4 bg-zinc-100 rounded-xl flex flex-col gap-4 relative">
       <BrowserRouter>
         <Test/>
         <Routes>

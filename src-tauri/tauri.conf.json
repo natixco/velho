@@ -66,13 +66,11 @@
     "windows": [
       {
         "title": "velho",
-        "height": 350,
-        "width": 400,
         "fullscreen": false,
-        "resizable": false,
-        "transparent": true,
+        "resizable": true,
+        "transparent": false,
         "decorations": false,
-        "skipTaskbar": true
+        "skipTaskbar": false
       }
     ],
     "systemTray": {
