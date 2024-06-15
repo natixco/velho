@@ -1,12 +1,13 @@
-import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import Lights from './views/Lights';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useLights } from './hooks/useLights';
 import { useEvent } from './hooks/useEvent';
 import { Light } from './models';
 import LightView from './views/LightView';
 
-function Test() {
+export default function App() {
+
   const location = useLocation();
   const { lights, refreshLights, setLights } = useLights();
 
@@ -25,24 +26,16 @@ function Test() {
     setLights(devicesCopy);
   });
 
-  return <></>;
-}
-
-export default function App() {
-
   useEffect(() => {
     window.addEventListener('contextmenu', e => e.preventDefault());
   }, []);
 
   return (
     <div data-tauri-drag-region className="w-full py-4 px-4 bg-zinc-100 rounded-xl flex flex-col gap-4 relative">
-      <BrowserRouter>
-        <Test/>
-        <Routes>
-          <Route path="/" element={<Lights/>}/>
-          <Route path="/:mac" element={<LightView/>}/>
-        </Routes>
-      </BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Lights/>}/>
+        <Route path="/:mac" element={<LightView/>}/>
+      </Routes>
     </div>
   );
 }
