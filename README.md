@@ -1,7 +1,6 @@
 # velho
 
-Velho (wizard in Finnish) is a desktop application developed using Tauri and React. 
-It provides a user interface for controlling Philips Wiz smart lights on the same network as the device running it is on.
+velho, meaning "wizard" in Finnish, is a desktop application for controlling Philips Wiz smart lights within the local network of the device it runs on.
 
 ## Features
 - [x] Discover lights on the network automatically
