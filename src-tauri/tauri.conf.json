@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "velho",
-    "version": "0.0.0"
+    "version": "0.0.1"
   },
   "tauri": {
     "allowlist": {
@@ -66,13 +66,11 @@
     "windows": [
       {
         "title": "velho",
-        "height": 350,
-        "width": 400,
         "fullscreen": false,
-        "resizable": false,
-        "transparent": true,
-        "decorations": false,
-        "skipTaskbar": true
+        "resizable": true,
+        "transparent": false,
+        "decorations": true,
+        "skipTaskbar": false
       }
     ],
     "systemTray": {

@@ -7,7 +7,7 @@ export interface LightState {
   dimming: number;
 }
 
-export interface Light {
+export interface ILight {
   name: string;
   available: boolean;
   state: LightState;
