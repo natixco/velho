@@ -49,7 +49,7 @@ export function useLights() {
     });
 
     if (success) {
-      refreshLights();
+      void refreshLights();
     }
 
     return success;

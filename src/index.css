@@ -10,9 +10,13 @@
   font-style: normal;
 }
 
+:root {
+  --stone-900: #0f172a;
+  --stone-200: #e2e8f0
+}
+
 * {
   -webkit-user-drag: none;
-  --asd: theme('colors.indigo.500');
   @apply transition-all outline-none select-none
 }
 
@@ -21,5 +25,10 @@ a, button {
 }
 
 body {
-  @apply overflow-hidden bg-zinc-100
+  @apply overflow-hidden bg-white
+}
+
+.webkit-slider-thumb::-webkit-slider-thumb {
+  cursor: pointer;
+  border: 2px solid var(--stone-900);
 }

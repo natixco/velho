@@ -1,12 +1,13 @@
 import { ILight } from '../models';
-import React, { ChangeEvent } from 'react';
+import React, { MouseEvent, ChangeEvent, useRef, useState, useEffect } from 'react';
 import clsx from 'clsx';
 import { Button } from './Button';
+import { MinusIcon, PlusIcon } from '@heroicons/react/24/solid';
 
 interface SliderProps {
-  title: string;
+  label: string;
   light: ILight;
-  subtitle: string;
+  valueLabel: string;
   onDecrease: () => void;
   onIncrease: () => void;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
@@ -19,36 +20,39 @@ interface SliderProps {
 }
 
 export function Slider(props: SliderProps) {
+
+  const ref = useRef<HTMLInputElement>(null);
+
+  if (ref.current) {
+    const progress = (props.input.value - props.input.min) / (props.input.max - props.input.min) * 100;
+    ref.current.style.background = `linear-gradient(to right, var(--stone-900) ${progress}%, var(--stone-200) ${progress}%)`;
+  }
+
   return (
     <div className="rounded-xl flex flex-col gap-2">
-      <div className="flex flex-row items-center gap-2">
-        <p className="font-bold text-zinc-900">{props.title}</p>
-        <span className="font-medium text-sm text-zinc-500">{props.subtitle}</span>
+      <div className="flex flex-row items-center justify-between">
+        <p className="font-bold text-stone-900">{props.label}</p>
+        <span className="font-medium text-sm text-stone-900">{props.valueLabel}</span>
       </div>
       <div className="h-10 grid grid-rows-1 grid-cols-[2.5rem_1fr_2.5rem] gap-2 items-center">
-        <Button variant="secondary" onClick={() => props.onDecrease()}>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
-               stroke="currentColor" className="min-w-[16px] group-hover:text-white transition-none">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" className="transition-none"/>
-          </svg>
+        <Button theme="secondary" onClick={() => props.onDecrease()}>
+          <MinusIcon className="h-6 text-stone-900"/>
         </Button>
         <input type="range" min={props.input.min} max={props.input.max} step={props.input.step}
                value={props.input.value}
+               ref={ref}
                onChange={e => props.onChange(e)}
                className={clsx(
-                 'appearance-none w-full h-2 bg-zinc-300 rounded-full outline-none',
+                 'webkit-slider-thumb appearance-none w-full h-2 bg-stone-200 rounded-full outline-none',
                  '[&::-webkit-slider-thumb]:appearance-none',
                  '[&::-webkit-slider-thumb]:w-4',
                  '[&::-webkit-slider-thumb]:h-4',
                  '[&::-webkit-slider-thumb]:rounded-full',
-                 '[&::-webkit-slider-thumb]:bg-indigo-500',
-                 'active:[&::-webkit-slider-thumb]:scale-[120%]',
+                 '[&::-webkit-slider-thumb]:bg-white',
+                 'active:[&::-webkit-slider-thumb]:scale-[110%]',
                )}/>
-        <Button variant="secondary" onClick={() => props.onIncrease()}>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
-               stroke="currentColor" className="min-w-[16px] group-hover:text-white transition-none">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" className="transition-none"/>
-          </svg>
+        <Button theme="secondary" onClick={() => props.onIncrease()}>
+          <PlusIcon className="h-6 text-stone-900"/>
         </Button>
       </div>
     </div>

@@ -1,11 +1,11 @@
 #![cfg_attr(
-all(not(debug_assertions), target_os = "windows"),
-windows_subsystem = "windows"
+    all(not(debug_assertions), target_os = "windows"),
+    windows_subsystem = "windows"
 )]
 
 use std::sync::{Arc, Mutex};
 
-use tauri::{CustomMenuItem, Manager, SystemTray, SystemTrayMenu};
+use tauri::Manager;
 
 use crate::light_controller::LightController;
 use crate::light_controller_wrapper::LightControllerWrapper;
@@ -22,11 +22,6 @@ mod light_controller_wrapper;
 mod light_storage;
 
 fn main() {
-    let tray_menu = SystemTrayMenu::new()
-        .add_item(CustomMenuItem::new("quit", "Quit"));
-    let system_tray = SystemTray::new()
-        .with_menu(tray_menu);
-
     tauri::Builder::default()
         .setup(move |app| {
             let storage = Storage::new(AppInfo {
@@ -51,14 +46,10 @@ fn main() {
             commands::set_pilot,
             commands::update_light,
         ])
-        .system_tray(system_tray)
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|_, event| match event {
-            tauri::RunEvent::ExitRequested { api, .. } => {
-                api.prevent_exit();
-            }
             _ => {}
         });
 }
