@@ -15,8 +15,8 @@ It provides a user interface for controlling Philips Wiz smart lights on the sam
 - [ ] Control groups of lights
 
 ## Screenshots
-![](https://raw.githubusercontent.com/natixco/velho/main/screenshots/lights.png)
-![](https://raw.githubusercontent.com/natixco/velho/main/screenshots/light.png)
+![](https://raw.githubusercontent.com/natixco/velho/main/screenshots/lights_0.0.1.png)
+![](https://raw.githubusercontent.com/natixco/velho/main/screenshots/light_0.0.1.png)
 
 ## Installation
 ### Prerequisites
