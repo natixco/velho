@@ -1,12 +1,12 @@
 import { useAtom } from 'jotai';
 import { lightsAtom } from '../store';
-import { Light, LightState } from '../models';
+import { ILight, LightState } from '../models';
 import { invoke } from '@tauri-apps/api';
 
 export function useLights() {
   const [lights, setLights] = useAtom(lightsAtom);
 
-  function setLightState(light: Light, params: Partial<LightState>) {
+  function setLightState(light: ILight, params: Partial<LightState>) {
     const index = lights.findIndex(d => d.state.ip === light.state.ip);
     if (index === -1) {
       return;
@@ -25,11 +25,11 @@ export function useLights() {
   }
 
   async function refreshLights() {
-    const lights = await invoke<Light[]>('get_lights');
+    const lights = await invoke<ILight[]>('get_lights');
     setLights(lights);
   }
 
-  async function setPilot(light: Light, params: Partial<LightState>) {
+  async function setPilot(light: ILight, params: Partial<LightState>) {
     const success = await invoke<boolean>('set_pilot', {
       ip: light.state.ip,
       params: params,
@@ -42,14 +42,14 @@ export function useLights() {
     return success;
   }
 
-  async function updateLight(light: Light, params: {name?: string}) {
+  async function updateLight(light: ILight, params: {name?: string}) {
     const success = await invoke<boolean>('update_light', {
       mac: light.state.mac,
       params: params,
     });
 
     if (success) {
-      refreshLights();
+      void refreshLights();
     }
 
     return success;
