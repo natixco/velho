@@ -69,7 +69,7 @@
         "fullscreen": false,
         "resizable": true,
         "transparent": false,
-        "decorations": false,
+        "decorations": true,
         "skipTaskbar": false
       }
     ],
