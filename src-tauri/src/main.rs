@@ -13,6 +13,7 @@ use crate::light_storage::LightStorage;
 use crate::socket_handler::SocketHandler;
 use crate::storage::{AppInfo, Storage};
 
+mod constants;
 mod light;
 mod storage;
 mod commands;
@@ -32,12 +33,14 @@ fn main() {
             })?;
 
             let mut socket_handler = SocketHandler::new()?;
-            socket_handler.start_listen(app.handle().clone());
+            socket_handler.start_listen(app.handle().clone())?;
 
-            app.manage(LightStorage::new(app.handle().clone(), storage));
-            app.manage(LightControllerWrapper {
-                controller: Arc::new(Mutex::new(LightController::new(Arc::new(Mutex::new(socket_handler))))),
-            });
+            let light_storage = LightStorage::new(app.handle().clone(), storage);
+            let light_controller = LightController::new(Arc::new(Mutex::new(socket_handler)));
+            let light_controller_wrapper = LightControllerWrapper::new(light_controller);
+
+            app.manage(light_storage);
+            app.manage(light_controller_wrapper);
 
             Ok(())
         })

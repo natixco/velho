@@ -3,6 +3,7 @@ use std::sync::Mutex;
 use serde_json::Value;
 use tauri::{AppHandle, Manager};
 
+use crate::constants::*;
 use crate::light::Light;
 use crate::storage::Storage;
 
@@ -14,52 +15,75 @@ pub struct LightStorage {
 
 impl LightStorage {
     pub fn new(app_handle: AppHandle, storage: Storage) -> Self {
+        let mut lights = storage.load().unwrap_or_else(|e| {
+            eprintln!("Failed to load lights from storage: {}", e);
+            Vec::new()
+        });
+
+        for light in &mut lights {
+            *light = light.clone().mark_unavailable();
+        }
+
         Self {
-            lights: Mutex::new(storage.load()),
+            lights: Mutex::new(lights),
             app_handle,
             storage,
         }
     }
 
-    pub fn get_lights(&self) -> Vec<Light> {
-        let lights = self.lights.lock().unwrap();
-        lights.to_vec()
+    pub fn get_lights(&self) -> Result<Vec<Light>, String> {
+        self.lights
+            .lock()
+            .map_err(|e| format!("Failed to acquire lights lock: {}", e))
+            .map(|lights| lights.clone())
     }
 
-    pub fn upsert_light(&self, mut light: Light) -> () {
-        let mut lights = self.lights.lock().unwrap();
-        let _light;
-        if let Some(existing_light) = lights.iter_mut().find(|d| d.state.mac == light.state.mac) {
-            existing_light.state = light.state;
-            existing_light.available = true;
-            _light = existing_light;
+    pub fn upsert_light(&self, light: Light) -> Result<(), String> {
+        let mut lights = self.lights
+            .lock()
+            .map_err(|e| format!("Failed to acquire lights lock: {}", e))?;
+
+        if let Some(existing_light) = lights.iter_mut().find(|l| l.state.mac == light.state.mac) {
+            let existing_light_name = existing_light.name.clone();
+            *existing_light = light.with_name(existing_light_name);
+            self.emit_light_event(existing_light.clone())?;
         } else {
-            light.name = light.state.mac.clone();
-            light.available = true;
             lights.push(light.clone());
-            _light = &mut light;
+            self.emit_light_event(light)?;
         }
 
-        self.app_handle.get_window("main").unwrap().emit("upsert_light", _light.clone()).unwrap();
+        self.storage.save(&lights)
+            .map_err(|e| format!("Failed to save lights: {}", e))?;
 
-        self.storage.save(lights.to_vec());
-        drop(lights);
+        Ok(())
     }
 
-    pub fn update_light(&self, mac: String, params: Value) -> bool {
-        let mut lights = self.lights.lock().unwrap();
+    pub fn update_light(&self, mac: String, params: Value) -> Result<bool, String> {
+        let mut lights = self.lights
+            .lock()
+            .map_err(|e| format!("Failed to acquire lights lock: {}", e))?;
 
-        if let Some(light) = lights.iter_mut().find(|d| d.state.mac == mac) {
-            light.name = params.get("name")
-                .and_then(Value::as_str)
-                .map_or_else(|| light.state.mac.clone(), |s| s.to_string());
+        if let Some(light) = lights.iter_mut().find(|l| l.state.mac == mac) {
+            if let Some(name) = params.get(NAME_FIELD).and_then(Value::as_str) {
+                light.name = name.to_string();
+            }
 
-            return true;
+            *light = light.clone().update_state(&params);
+
+            self.storage.save(&lights)
+                .map_err(|e| format!("Failed to save lights: {}", e))?;
+
+            Ok(true)
+        } else {
+            Ok(false)
         }
+    }
 
-        self.storage.save(lights.to_vec());
-        drop(lights);
-
-        false
+    fn emit_light_event(&self, light: Light) -> Result<(), String> {
+        if let Some(window) = self.app_handle.get_window(MAIN_WINDOW_NAME) {
+            window.emit(UPSERT_LIGHT_EVENT, light)
+                .map_err(|e| format!("Failed to emit light event: {}", e))?;
+        }
+        Ok(())
     }
 }

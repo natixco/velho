@@ -1,12 +1,13 @@
+use std::path::PathBuf;
 use std::sync::Arc;
 
+use tauri::api::path::{resolve_path, BaseDirectory};
 use tauri::{AppHandle, Config, Env, PackageInfo};
-use tauri::api::path::{BaseDirectory, resolve_path};
 
+use crate::constants::STORAGE_FILE_NAME;
 use crate::light::Light;
 
-static STORAGE_FILE_NAME: &str = "lights.json";
-
+#[derive(Clone)]
 pub struct AppInfo {
     pub handle: AppHandle,
     pub config: Arc<Config>,
@@ -20,48 +21,59 @@ pub struct Storage {
 
 impl Storage {
     pub fn new(app: AppInfo) -> std::io::Result<Self> {
-        Ok(Self {
-            app,
-        })
+        Ok(Self { app })
     }
 
-    pub fn load(&self) -> Vec<Light> {
-        let path = self.get_storage_path();
-        let json = std::fs::read_to_string(path);
-        if let Ok(json) = json {
-            match serde_json::from_str::<Vec<Light>>(&json) {
-                Ok(lights) => return lights,
-                Err(error) => println!("Error while parsing storage: {}", error),
+    pub fn load(&self) -> Result<Vec<Light>, String> {
+        let path = self.get_storage_path()?;
+
+        match std::fs::read_to_string(&path) {
+            Ok(json) => {
+                serde_json::from_str::<Vec<Light>>(&json)
+                    .map_err(|e| format!("Failed to parse storage file: {}", e))
             }
-        } else {
-            println!("Error while loading storage: {}", json.unwrap_err());
-        }
-
-        Vec::new()
-    }
-
-    pub fn save(&self, lights: Vec<Light>) -> () {
-        self.ensure_storage_file();
-
-        let json = serde_json::to_string(&lights).unwrap();
-        let path = self.get_storage_path();
-        if let Err(error) = std::fs::write(path, json) {
-            println!("Error while saving storage: {}", error);
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+                Ok(Vec::new())
+            }
+            Err(e) => {
+                Err(format!("Failed to read storage file: {}", e))
+            }
         }
     }
 
-    fn ensure_storage_file(&self) -> () {
-        let path = self.get_storage_path();
-        let parent = path.parent().unwrap();
+    pub fn save(&self, lights: &[Light]) -> Result<(), String> {
+        self.ensure_storage_directory()?;
 
-        if !parent.exists() {
-            if let Err(error) = std::fs::create_dir(parent) {
-                println!("Error while creating storage dir: {}", error);
-            };
-        }
+        let json = serde_json::to_string_pretty(lights)
+            .map_err(|e| format!("Failed to serialize lights: {}", e))?;
+
+        let path = self.get_storage_path()?;
+
+        std::fs::write(&path, json)
+            .map_err(|e| format!("Failed to write storage file: {}", e))
     }
 
-    fn get_storage_path(&self) -> std::path::PathBuf {
-        resolve_path(&self.app.config, &self.app.package_info, &self.app.env, STORAGE_FILE_NAME, Some(BaseDirectory::AppData)).unwrap()
+    fn ensure_storage_directory(&self) -> Result<(), String> {
+        let path = self.get_storage_path()?;
+
+        if let Some(parent) = path.parent() {
+            if !parent.exists() {
+                std::fs::create_dir_all(parent)
+                    .map_err(|e| format!("Failed to create storage directory: {}", e))?;
+            }
+        }
+
+        Ok(())
+    }
+
+    fn get_storage_path(&self) -> Result<PathBuf, String> {
+        resolve_path(
+            &self.app.config,
+            &self.app.package_info,
+            &self.app.env,
+            STORAGE_FILE_NAME,
+            Some(BaseDirectory::AppData),
+        )
+            .map_err(|e| format!("Failed to resolve storage path: {}", e))
     }
 }
